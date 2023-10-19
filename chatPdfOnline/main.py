@@ -20,10 +20,9 @@ st.title("PDF Genie")
 st.write("---")
 
 api_key = st.text_input('OPEN AI API key를 넣어주세요.', type="password")
-openai.api_key = api_key
+
+
 # Make a temp folder can store uploaded file.
-
-
 def pdf_to_document(uploaded_file):
     temp_dir = tempfile.TemporaryDirectory()
     temp_filepath = os.path.join(temp_dir.name, uploaded_file.name)
