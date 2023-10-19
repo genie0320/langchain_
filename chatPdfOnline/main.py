@@ -9,16 +9,16 @@ from langchain.vectorstores import Chroma
 import streamlit as st
 import tempfile
 import sys
+
+# these three lines swap the stdlib sqlite3 lib with the pysqlite3 package
 __import__('pysqlite3')
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
 
 st.title("PDF Genie")
 st.write("---")
 
+api_key = st.text_input('OPEN AI API key를 넣어주세요.', type="password")
+openai.api_key = api_key
 # Make a temp folder can store uploaded file.
 
 
@@ -53,7 +53,7 @@ if uploaded_file is not None:
     # Embedding Store to Chromadb.
     # Need to install [tiktoken] to use embedding.
 
-    embeddings_model = OpenAIEmbeddings()
+    embeddings_model = OpenAIEmbeddings(openai_api_key=api_key)
 
     # ## What is this? Why It causes typeerror?
     # embeddings = embeddings_model.embed_documents(texts)
@@ -66,7 +66,8 @@ if uploaded_file is not None:
 
     if st.button("궁금해", type="primary"):
         with st.spinner('Wait for it...'):
-            myllm = ChatOpenAI(temperature=0, max_tokens=100)
+            myllm = ChatOpenAI(temperature=0, max_tokens=100,
+                               openai_api_key=api_key)
             qa = RetrievalQA.from_chain_type(
                 llm=myllm,
                 # chain_type="stuff",
