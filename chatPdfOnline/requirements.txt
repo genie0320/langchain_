@@ -3,3 +3,4 @@ openai
 Pypdf
 chromadb
 tiktoken
+pysqlite3-binary
