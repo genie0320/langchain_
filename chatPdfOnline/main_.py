@@ -8,22 +8,14 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.vectorstores import Chroma
 import streamlit as st
 import tempfile
-import sys
-
-# openai.api_key = os.getenv("OPENAI_API_KEY")
-
-# these three lines swap the stdlib sqlite3 lib with the pysqlite3 package
-__import__('pysqlite3')
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 st.title("PDF Genie")
 st.write("---")
 
-api_key = st.text_input('OPEN AI API key를 넣어주세요.', type="password")
-openai.api_key = api_key
+# openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
 # Make a temp folder can store uploaded file.
-
-
 def pdf_to_document(uploaded_file):
     temp_dir = tempfile.TemporaryDirectory()
     temp_filepath = os.path.join(temp_dir.name, uploaded_file.name)
@@ -53,11 +45,9 @@ if uploaded_file is not None:
     texts = text_splitter.split_documents(pages)
 
     # Embedding Store to Chromadb.
-    # Need to install [tiktoken] to use embedding.
+    # Need to install [tiktoken] to use embedding. but why?
 
-    # off-line setting
-    # embeddings_model = OpenAIEmbeddings()
-    embeddings_model = OpenAIEmbeddings(openai_api_key=api_key)
+    embeddings_model = OpenAIEmbeddings()
 
     # ## What is this? Why It causes typeerror?
     # embeddings = embeddings_model.embed_documents(texts)
@@ -68,19 +58,17 @@ if uploaded_file is not None:
     # ------ After create db, then UI comes out.
     query = st.text_input('PDF분석이 완료되었습니다. 질문을 입력해주세요.')
 
+    # Query
+    # Search similar phrase from db and Toss it to the llm model to make a structured sentence.
+
     if st.button("궁금해", type="primary"):
         with st.spinner('Wait for it...'):
-            myllm = ChatOpenAI(temperature=0, max_tokens=100,
-                               openai_api_key=api_key
-                               )
+            myllm = ChatOpenAI(temperature=0, max_tokens=100)
             qa = RetrievalQA.from_chain_type(
                 llm=myllm,
                 # chain_type="stuff",
                 retriever=db.as_retriever())
             answer = qa.run(query)
             st.write(answer)
-
-    # Query
-    # Search similar phrase from db and Toss it to the llm model to make a structured sentence.
 
     print('Done')
